@@ -11,6 +11,18 @@ class Blockchain {
     this.addBlock(genesisBlock)
   }
 
+  transactionsByDrivingLicenseNumber(driverLicenseNumber){
+    let transactions = []
+    this.blocks.forEach((block)=>{
+        block.transactions.forEach((transaction)=>{
+            if(transaction.driverLicenseNumber == driverLicenseNumber){
+              transactions.push(transaction)
+            }
+        })
+    })
+    return transactions;
+  }
+
   addBlock(block) {
 
     if(this.blocks.length == 0) {
@@ -49,7 +61,7 @@ class Blockchain {
       while(!hash.startsWith("000")) {
         block.nonce += 1
         hash = sha256(block.key)
-      //  console.log(hash)
+        console.log(hash)
       }
 
       return hash

@@ -3,7 +3,8 @@ let Block = require('./block')
 let Blockchain = require('./blockchain')
 let BlockchainNode = require('./BlockchainNode')
 let Transaction = require('./transaction')
-
+let sha256 = require('js-sha256')
+let DrivingRecordSmartContract = require('./smartContract')
 let fetch = require('node-fetch')
 
 const express = require('express')
@@ -79,15 +80,27 @@ app.get('/mine',function(req,res){
     res.json(block)
 })
 
+app.get('/driving-records/:drivingLicenseNumber',(request, response)=>{
+  console.log("Reached the method")
+  console.log("Data received :", request.params.drivingLicenseNumber)
+  let drivingLicenseNumber = sha256(request.params.drivingLicenseNumber)
+  let transactions = blockchain.transactionsByDrivingLicenseNumber(drivingLicenseNumber)
+  response.json(transactions)
+})
+
 app.post('/transactions',function(req,res){
 
   console.log(transactions)
 
-  let to = req.body.to
-  let from = req.body.from
-  let amount = req.body.amount
+  let drivingRecordSmartContract = new DrivingRecordSmartContract()
 
-  let transaction = new Transaction(from,to,amount)
+  let driverLicenseNumber = sha256(req.body.driverLicenseNumber) 
+  let voilationDate = req.body.voilationDate
+  let voilationType = req.body.voilationType
+
+  let transaction = new Transaction(driverLicenseNumber,voilationDate,voilationType)
+
+  drivingRecordSmartContract.apply(transaction,blockchain.blocks)
 
   transactions.push(transaction)
 
